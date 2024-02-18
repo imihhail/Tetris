@@ -60,7 +60,7 @@ function line() {
     tripleBackground.className = 'restBackground'
     tripleBackground.setAttribute("id", blockCounter)
 
-    let randomNumber = Math.floor(Math.random() * 1);
+    let randomNumber = Math.floor(Math.random() * 5);
 
          if (randomNumber == 0) {tetra0(quadraBackground), backroundChoice = quadraBackground}
     else if (randomNumber == 1) {tetra1(tripleBackground), backroundChoice = tripleBackground}
@@ -166,13 +166,8 @@ function line() {
             //}, 600);
             
         } else {
+            fallingBlocks.forEach((block) => {block.setAttribute('rotation', rotation)}) 
             speed = 1
-           // fallingBlocks.forEach((block) => {
-           //     block.setAttribute('rotation', rotation);
-           //     block.setAttribute('top', block.getBoundingClientRect().top);
-           //     console.log(block.getBoundingClientRect().top)
-           // });
-
             blockCounter++
             deleteRows()
             line()
@@ -305,36 +300,44 @@ function tetra4(tripleBackground) {
     frame.appendChild(tripleBackground)
 }
 
-function deleteRows(){
+function deleteRows() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
-    //const filledRow = document.querySelectorAll(`[top="${frameDivBottom - 38}"]`)
-    var allrows = []
-    for (let i = 0 ; i < 20 ; i++){
-        let filteredBlocks = Array.from(allBlocks).filter(block => block.getBoundingClientRect().top === frameDivBottom - 38)    
-    }
-    
+    var n = 38
+    var allFilledRows = []
+    var removedRowFloor = 0
+    var removeCount = 0;
+    var countRemovedFloors = 0
 
-    var fullLine = filteredBlocks.length
-    var removeRow = filteredBlocks
-
-    if (fullLine == 10) {
-        for(let i = 0 ; i < removeRow.length ; i++) {
-            removeRow[i].remove()
-        }
-
-    //let allBlocks = Array.from(document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`))
-
-        setTimeout (function() {
-            for (let i = 0 ; i < allBlocks.length ; i++) {
-                //let currentTop = parseInt(allBlocks[i].style.top, 10);
-                //var currentTops = parseInt(window.getComputedStyle(allBlocks[i]).top);
-                //var newTop = currentTops + 38;
-
-                if (allBlocks[i].getAttribute('rotation') === '0'  ) {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) + 38 + 'px'}                   
-                if (allBlocks[i].getAttribute('rotation') === '90' ) {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) + 38 + 'px'}
-                if (allBlocks[i].getAttribute('rotation') === '180') {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) - 38 + 'px'}
-                if (allBlocks[i].getAttribute('rotation') === '270') {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) - 38 + 'px'}
+    for (let y = 0 ; y < 20 ; y++) {       
+        let rowOccupancy = Array.from(allBlocks).filter(block => block.getBoundingClientRect().top === frameDivBottom - n)
+        allFilledRows.push(rowOccupancy)
+        if (allFilledRows[y].length == 10) {
+            for (let x = 0 ; x < allFilledRows[y].length ; x++) {
+                removedRowFloor = allFilledRows[y][x].getBoundingClientRect().top + countRemovedFloors
+                allFilledRows[y][x].remove()
+                removeCount++; 
+                
+                if (removeCount === 10) {
+                    adjustBlocks(allBlocks, removedRowFloor)
+                    removeCount = 0;                 
+                }
             }
-        }, 400);
+            countRemovedFloors += 38
+        }
+        n += 38   
     }
-} 
+}
+
+function adjustBlocks(allBlocks, removedRowFloor) {
+    setTimeout (function() {
+        for (let i = 0 ; i < allBlocks.length ; i++) {
+            if (allBlocks[i].getBoundingClientRect().top < removedRowFloor) {
+
+            if (allBlocks[i].getAttribute('rotation') === '0'  ) {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) + 38 + 'px'}                   
+            if (allBlocks[i].getAttribute('rotation') === '90' ) {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) + 38 + 'px'}
+            if (allBlocks[i].getAttribute('rotation') === '180') {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) - 38 + 'px'}
+            if (allBlocks[i].getAttribute('rotation') === '270') {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) - 38 + 'px'}
+            }
+        }
+    }, 400);
+}
