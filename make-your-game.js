@@ -54,7 +54,6 @@ let frameDivX = frame.getBoundingClientRect().x + 38
 let frameDivRight = frame.getBoundingClientRect().right - 38
 let blockCounter = 1
 let speed = 2
-let isPaused = false
 let animationId = null
 let gamePaused = false
 
@@ -76,10 +75,9 @@ function line() {
     else if (randomNumber == 2) {tetra2(tripleBackground), backroundChoice = tripleBackground}
     else if (randomNumber == 3) {tetra3(tripleBackground), backroundChoice = tripleBackground}
     else if (randomNumber == 4) {tetra4(tripleBackground), backroundChoice = tripleBackground}
-    console.log(randomMirror)
 
     backroundChoice.style.marginLeft = '114px'
-    if (randomMirror == 1) {
+    if (randomMirror == 0) {
         backroundChoice.style.transform = 'rotateY(180deg)'
     }
 
@@ -129,9 +127,13 @@ function line() {
             const initialTransform = backroundChoice.style.transform;
             const initialMarginLeft = backroundChoice.style.marginLeft;
             const initialMarginTop = backroundChoice.style.marginTop;
+            let mirrorRot = 0
+            if (randomMirror == 0) {
+                mirrorRot = 180
+            }
 
-            rotation += 90; 
-            backroundChoice.style.transform = `rotate(${rotation}deg)`;
+            rotation += 90;
+            backroundChoice.style.transform = `rotate(${rotation}deg) rotateY(${mirrorRot}deg)`;
             for (let i = 0 ; i < allBlocks.length ; i ++) {
                 for (let j = 0; j < fallingBlocks.length; j++) {
                     let fallenBlocks = allBlocks[i].getBoundingClientRect();
