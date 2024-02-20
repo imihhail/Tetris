@@ -25,7 +25,7 @@ statsFrame.innerHTML = 'SCORE'
 statsFrame.style.color = "white"
 statsFrame.style.fontSize = '20px'
 statsFrame.style.textAlign = 'center'
-//statsFrame.style.transition = '2s'
+
 
 let centerDiv = document.createElement('div');
 centerDiv.style.display = "flex";
@@ -69,14 +69,19 @@ function line() {
     tripleBackground.setAttribute("id", blockCounter)
 
     let randomNumber = Math.floor(Math.random() * 5);
+    let randomMirror = Math.floor(Math.random() * 2);
 
          if (randomNumber == 0) {tetra0(quadraBackground), backroundChoice = quadraBackground}
     else if (randomNumber == 1) {tetra1(tripleBackground), backroundChoice = tripleBackground}
     else if (randomNumber == 2) {tetra2(tripleBackground), backroundChoice = tripleBackground}
     else if (randomNumber == 3) {tetra3(tripleBackground), backroundChoice = tripleBackground}
     else if (randomNumber == 4) {tetra4(tripleBackground), backroundChoice = tripleBackground}
+    console.log(randomMirror)
 
     backroundChoice.style.marginLeft = '114px'
+    if (randomMirror == 1) {
+        backroundChoice.style.transform = 'rotateY(180deg)'
+    }
 
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
