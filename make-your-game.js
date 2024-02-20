@@ -4,25 +4,28 @@ frame.style.height = "760px";
 frame.style.border = '38px ridge rgb(9, 23, 174)';
 frame.style.background = 'url(./db2.jpg)'
 
-let nextBlockFreame = document.createElement('div');
-nextBlockFreame.style.width = "180px";
-nextBlockFreame.style.height = "180px";
-nextBlockFreame.style.border = '14.4px ridge rgb(9, 23, 174)';
-nextBlockFreame.innerHTML = "NEXT"
-nextBlockFreame.style.color = "white"
-nextBlockFreame.style.fontSize = '23.4px'
-nextBlockFreame.style.textAlign = 'center'
-nextBlockFreame.style.padding = '14.4px'
+let score = 0
+let life = 1
+let countdown = 60
+let gameOver = false
 
 let statsFrame = document.createElement('div')
+statsFrame.className = 'test'
+let scoreTag = document.createElement('p')
+scoreTag.innerHTML = `${score}<br><br>`
+let lifeTag = document.createElement('p')
+lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`;
+let timerTag = document.createElement('p')
+
 statsFrame.style.width = "180px";
-statsFrame.style.height = "421.2px";
+statsFrame.style.height = "300px";
 statsFrame.style.border = '14.4px ridge rgb(9, 23, 174)';
 statsFrame.style.padding = '14.4px'
 statsFrame.innerHTML = 'SCORE'
 statsFrame.style.color = "white"
-statsFrame.style.fontSize = '23.4px'
+statsFrame.style.fontSize = '20px'
 statsFrame.style.textAlign = 'center'
+//statsFrame.style.transition = '2s'
 
 let centerDiv = document.createElement('div');
 centerDiv.style.display = "flex";
@@ -37,18 +40,23 @@ let verticalDiv = document.createElement('div');
 verticalDiv.style.display = "block";
 
 centerDiv.appendChild(frame);
-verticalDiv.appendChild(nextBlockFreame);
+
 verticalDiv.appendChild(statsFrame);
+statsFrame.appendChild(scoreTag)
+statsFrame.appendChild(lifeTag)
+statsFrame.appendChild(timerTag)
 parentDiv.appendChild(centerDiv);
 parentDiv.appendChild(verticalDiv);
 document.body.appendChild(parentDiv);
-
 
 let frameDivBottom = frame.getBoundingClientRect().bottom - 38
 let frameDivX = frame.getBoundingClientRect().x + 38
 let frameDivRight = frame.getBoundingClientRect().right - 38
 let blockCounter = 1
-let speed = 1
+let speed = 2
+let isPaused = false
+let animationId = null
+let gamePaused = false
 
 function line() {
     let backroundChoice = ''
@@ -79,7 +87,7 @@ function line() {
         
         var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().right == frameDivRight)
 
-        if (keyName === 'ArrowRight' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck3() ) {
+        if (keyName === 'ArrowRight' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck2() ) {
             backroundChoice.style.marginLeft = parseFloat(backroundChoice.style.marginLeft) + 38 + 'px'            
         }
     });
@@ -88,94 +96,125 @@ function line() {
         const keyName = e.key
         let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`))
 
-        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().x == frameDivX)
+        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().x <= frameDivX)
 
-        if (keyName === 'ArrowLeft' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck2() ) {    
+        if (keyName === 'ArrowLeft' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck3() ) {    
             backroundChoice.style.marginLeft = parseFloat(backroundChoice.style.marginLeft) - 38 + 'px'
         }
     })
    
-    let downKey = 0
     let yPos = 0
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' /*&& backroundChoice.id == blockCounter && !collusionCheck() && backroundChoice.getBoundingClientRect().bottom < frameDivBottom*/) {
-            downKey += 38
-            //backroundChoice.style.marginTop = parseFloat(backroundChoice.style.marginTop) + 38 + 'px';
+        //var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().x <= frameDivX)
+        let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`))
+        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom >= frameDivBottom)
+        if (e.key === 'ArrowDown' && backroundChoice.id == blockCounter && !frameCollusion) {
+            while (yPos % 38 !== 0) {
+                yPos++
+            }
             speed = 19
         }
     })
 
     let rotation = 0;
     document.addEventListener('keydown', (e) => {
-        const initialRotation = rotation;
-        const initialTransform = backroundChoice.style.transform;
-        const initialMarginLeft = backroundChoice.style.marginLeft;
-        const initialMarginTop = backroundChoice.style.marginTop;
-
         if (e.key === ' ' && backroundChoice.id == blockCounter && randomNumber != 2) {
+            const initialRotation = rotation;
+            const initialTransform = backroundChoice.style.transform;
+            const initialMarginLeft = backroundChoice.style.marginLeft;
+            const initialMarginTop = backroundChoice.style.marginTop;
+
             rotation += 90; 
-            backroundChoice.style.transform = `rotate(${rotation}deg)`;     
-        }
-
-        if (rotation == 360) {
-            rotation = 0
-        }
-
-        for (let i = 0 ; i < fallingBlocks.length ; i++){
-            if((fallingBlocks[i].getBoundingClientRect().x < frameDivX || fallingBlocks[i].getBoundingClientRect().right > frameDivRight) ||
-                fallingBlocks[i].getBoundingClientRect().bottom > frameDivBottom) {
-                    
-                rotation = initialRotation;
-                backroundChoice.style.transform = initialTransform;
-                backroundChoice.style.marginLeft = initialMarginLeft;
-                backroundChoice.style.marginTop = initialMarginTop;
-                return
+            backroundChoice.style.transform = `rotate(${rotation}deg)`;
+            for (let i = 0 ; i < allBlocks.length ; i ++) {
+                for (let j = 0; j < fallingBlocks.length; j++) {
+                    let fallenBlocks = allBlocks[i].getBoundingClientRect();
+                    let fallingBlock = fallingBlocks[j].getBoundingClientRect();
+                    if (fallenBlocks.left <= fallingBlock.right && fallenBlocks.right >= fallingBlock.left &&
+                        fallenBlocks.top <= fallingBlock.bottom && fallenBlocks.bottom >= fallingBlock.top) {
+                        rotation = initialRotation;
+                        backroundChoice.style.transform = initialTransform;
+                        backroundChoice.style.marginLeft = initialMarginLeft;
+                        backroundChoice.style.marginTop = initialMarginTop;
+                        return
+                    }
+                }      
             }
-        }
-
-        for (let i = 0 ; i < allBlocks.length ; i ++) {
-            for (let j = 0; j < fallingBlocks.length; j++) {
-                if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left &&
-                    allBlocks[i].getBoundingClientRect().top == fallingBlocks[j].getBoundingClientRect().top)  {
-
+            for (let i = 0 ; i < fallingBlocks.length ; i++){
+                let fallingBlock = fallingBlocks[i].getBoundingClientRect();
+                if((fallingBlock.x < frameDivX || fallingBlock.right > frameDivRight) || fallingBlock.bottom > frameDivBottom) {
                     rotation = initialRotation;
                     backroundChoice.style.transform = initialTransform;
                     backroundChoice.style.marginLeft = initialMarginLeft;
                     backroundChoice.style.marginTop = initialMarginTop;
                     return
                 }
-            }      
+            }
+        }
+        if (rotation == 360) {
+            rotation = 0;
         }
     });
-      
-    function drop() {
-        let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`));
-        
-        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom == frameDivBottom);
 
-        if (!frameCollusion && !collusionCheck()) {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'p' && !gameOver && backroundChoice.id == blockCounter && !gamePaused) {
+                gamePaused = true
+                let pauseDiv = document.createElement('div');
+                let continueText = document.createElement('p');
+                let restartText = document.createElement('p');
+
+                pauseDiv.className = 'lost';
+                continueText.innerHTML = 'CONTINUE';
+                continueText.className = 'restartClass';
+                restartText.innerHTML = 'RESTART';
+                restartText.className = 'restartClass';
+
+                restartText.addEventListener('click', ()=>{
+                    location.reload();
+                });
+
+                continueText.addEventListener('click', ()=>{
+                    animationId = window.requestAnimationFrame(drop);
+                    gamePaused = false
+                    pauseDiv.remove()
+                });
+                
+                pauseDiv.appendChild(continueText);
+                pauseDiv.appendChild(restartText);
+                document.body.appendChild(pauseDiv);
+                cancelAnimationFrame(animationId);     
+        }
+    });
+
+    function drop() {
+        let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`))
+
+        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom >= frameDivBottom)
+        
+        if (gameOver) {
+            GameOverWindow();
+            cancelAnimationFrame(animationId)
+            return
+        }
+    
+        if (!frameCollusion && !collusionCheck() ) {
             yPos += speed       
             backroundChoice.style.marginTop = `${yPos}px`
-            if (yPos > 550) {
-                speed = 1
-            }
-
-            //setTimeout (function () {
-                requestAnimationFrame(drop);
-            //}, 600);
-            
+            animationId = requestAnimationFrame(drop)
+    
         } else {
+            speed = 2
             fallingBlocks.forEach((block) => {block.setAttribute('rotation', rotation)}) 
-            speed = 1
             blockCounter++
             deleteRows()
-            line()
+            line()         
         }        
     }
-    window.requestAnimationFrame(drop);
+    animationId = window.requestAnimationFrame(drop)
 }
 line()
+
 
 function collusionCheck() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
@@ -195,9 +234,9 @@ function collusionCheck2() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
     
-    for (let i = 0 ; i < allBlocks.length ; i ++) {
+    for (let i = 0 ; i < allBlocks.length ; i++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
-            if (allBlocks[i].getBoundingClientRect().left + 38 == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top + 38 == fallingBlocks[j].getBoundingClientRect().bottom) {
+            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().right && allBlocks[i].getBoundingClientRect().top <= fallingBlocks[j].getBoundingClientRect().bottom && allBlocks[i].getBoundingClientRect().bottom >= fallingBlocks[j].getBoundingClientRect().top) {
                 return true;
             }
         }      
@@ -211,7 +250,7 @@ function collusionCheck3() {
     
     for (let i = 0 ; i < allBlocks.length ; i ++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
-            if (allBlocks[i].getBoundingClientRect().right - 38 == fallingBlocks[j].getBoundingClientRect().right && allBlocks[i].getBoundingClientRect().top + 38 == fallingBlocks[j].getBoundingClientRect().bottom) {
+            if (allBlocks[i].getBoundingClientRect().right == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top <= fallingBlocks[j].getBoundingClientRect().bottom && allBlocks[i].getBoundingClientRect().bottom >= fallingBlocks[j].getBoundingClientRect().top) {
                 return true;
             }
         }      
@@ -318,6 +357,10 @@ function deleteRows() {
                 removeCount++; 
                 
                 if (removeCount === 10) {
+                    score += 10
+                    countdown += 7
+
+                    scoreTag.innerHTML = `${score}<br><br>`
                     adjustBlocks(allBlocks, removedRowFloor)
                     removeCount = 0;                 
                 }
@@ -326,13 +369,17 @@ function deleteRows() {
         }
         n += 38   
     }
+    if (allFilledRows[19].length != 0) {
+        life -= 1
+        lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`
+        gameOver = true
+    }
 }
 
 function adjustBlocks(allBlocks, removedRowFloor) {
     setTimeout (function() {
         for (let i = 0 ; i < allBlocks.length ; i++) {
             if (allBlocks[i].getBoundingClientRect().top < removedRowFloor) {
-
             if (allBlocks[i].getAttribute('rotation') === '0'  ) {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) + 38 + 'px'}                   
             if (allBlocks[i].getAttribute('rotation') === '90' ) {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) + 38 + 'px'}
             if (allBlocks[i].getAttribute('rotation') === '180') {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) - 38 + 'px'}
@@ -341,3 +388,62 @@ function adjustBlocks(allBlocks, removedRowFloor) {
         }
     }, 400);
 }
+
+function startCountdown() {
+    function updateDisplay() {
+        let minutes = Math.floor(countdown / 60);
+        let seconds = countdown % 60;
+
+        timerTag.innerHTML = `TIME LEFT <br><br> ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+    updateDisplay();
+
+    let intervalId = setInterval(() => {
+        if (gamePaused) {
+            return;
+        }
+        countdown--;
+        updateDisplay();
+
+        if (gameOver) {
+            clearInterval(intervalId);
+        }
+        if (countdown < 1) {
+            clearInterval(intervalId);
+            life -= 1;
+            lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`;
+            gameOver = true;
+        }
+    }, 1000);
+}
+startCountdown();
+
+function GameOverWindow(){
+        let loseWindow = document.createElement('div')
+        loseWindow.className = 'lost'
+        loseWindow.innerHTML = 'GAME OVER'
+
+        let restardText = document.createElement('p')
+        restardText.className = 'restartClass'
+        restardText.innerHTML = 'RESTART'
+
+        restardText.addEventListener('click', ()=>{
+            frame.innerHTML = ''
+            gameOver = false
+            loseWindow.style.display = 'none'
+            life = 1
+            score = 0
+            lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`
+            scoreTag.innerHTML = `${score}<br><br>`
+            countdown = 60
+            startCountdown()
+            line()
+        })
+
+        loseWindow.appendChild(restardText)
+        document.body.appendChild(loseWindow)
+}
+
+
+
+
