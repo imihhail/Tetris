@@ -48,6 +48,7 @@ statsFrame.appendChild(timerTag)
 parentDiv.appendChild(centerDiv);
 parentDiv.appendChild(verticalDiv);
 document.body.appendChild(parentDiv);
+document.body.style.overflow = "hidden"
 
 let frameDivBottom = frame.getBoundingClientRect().bottom - 38
 let frameDivX = frame.getBoundingClientRect().x + 38
@@ -109,10 +110,11 @@ function line() {
     let yPos = 0
 
     document.addEventListener('keydown', (e) => {
-        //var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().x <= frameDivX)
         let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`))
-        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom >= frameDivBottom)
-        if (e.key === 'ArrowDown' && backroundChoice.id == blockCounter && !frameCollusion) {
+        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom >= frameDivBottom - 38)
+
+        
+        if (e.key === 'ArrowDown' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck1()) {
             while (yPos % 38 !== 0) {
                 yPos++
             }
@@ -212,7 +214,10 @@ function line() {
     
         } else {
             speed = 2
-            fallingBlocks.forEach((block) => {block.setAttribute('rotation', rotation)}) 
+            fallingBlocks.forEach((block) => {
+                block.setAttribute('rotation', rotation);
+                block.setAttribute('mirror', randomMirror);
+            })        
             blockCounter++
             deleteRows()
             line()         
@@ -230,6 +235,20 @@ function collusionCheck() {
     for (let i = 0 ; i < allBlocks.length ; i ++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
             if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top == fallingBlocks[j].getBoundingClientRect().bottom) {
+                return true;
+            }
+        }      
+    }
+    return false;
+}
+
+function collusionCheck1() {
+    let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
+    let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
+
+    for (let i = 0 ; i < allBlocks.length ; i ++) {
+        for (let j = 0; j < fallingBlocks.length; j++) {
+            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top -38 <= fallingBlocks[j].getBoundingClientRect().bottom) {
                 return true;
             }
         }      
@@ -365,7 +384,7 @@ function deleteRows() {
                 
                 if (removeCount === 10) {
                     score += 10
-                    countdown += 7
+                    countdown += 4
 
                     scoreTag.innerHTML = `${score}<br><br>`
                     adjustBlocks(allBlocks, removedRowFloor)
@@ -384,17 +403,22 @@ function deleteRows() {
 }
 
 function adjustBlocks(allBlocks, removedRowFloor) {
-    setTimeout (function() {
-        for (let i = 0 ; i < allBlocks.length ; i++) {
-            if (allBlocks[i].getBoundingClientRect().top < removedRowFloor) {
-            if (allBlocks[i].getAttribute('rotation') === '0'  ) {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) + 38 + 'px'}                   
-            if (allBlocks[i].getAttribute('rotation') === '90' ) {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) + 38 + 'px'}
-            if (allBlocks[i].getAttribute('rotation') === '180') {allBlocks[i].style.marginTop = parseFloat(allBlocks[i].style.marginTop) - 38 + 'px'}
-            if (allBlocks[i].getAttribute('rotation') === '270') {allBlocks[i].style.marginLeft = parseFloat(allBlocks[i].style.marginLeft) - 38 + 'px'}
+    setTimeout(() => {
+        allBlocks.forEach(block => {
+            if (block.getBoundingClientRect().top < removedRowFloor) {
+                const rotation = block.getAttribute('rotation');
+                const mirror = block.getAttribute('mirror');
+                const adjustment = rotation === '0' || rotation === '270' && mirror === '0' || rotation === '90' && mirror === '1' ? 38 : -38;
+                if (rotation === '0' || rotation === '180') {
+                    block.style.marginTop = `${parseFloat(block.style.marginTop) + adjustment}px`;
+                } else {
+                    block.style.marginLeft = `${parseFloat(block.style.marginLeft) + adjustment}px`;
+                }
             }
-        }
+        });
     }, 400);
 }
+
 
 function startCountdown() {
     function updateDisplay() {
