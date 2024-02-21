@@ -1,3 +1,7 @@
+window.onresize = function() {
+    location.reload();
+};
+
 let frame = document.createElement('div');
 frame.style.width = "380px";
 frame.style.height = "760px";
@@ -89,7 +93,7 @@ function line() {
         const keyName = e.key;
         let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`));
         
-        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().right == frameDivRight)
+        var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().right >= frameDivRight)
 
         if (keyName === 'ArrowRight' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck2() ) {
             backroundChoice.style.marginLeft = parseFloat(backroundChoice.style.marginLeft) + 38 + 'px'            
@@ -152,7 +156,7 @@ function line() {
             }
             for (let i = 0 ; i < fallingBlocks.length ; i++){
                 let fallingBlock = fallingBlocks[i].getBoundingClientRect();
-                if((fallingBlock.x < frameDivX || fallingBlock.right > frameDivRight) || fallingBlock.bottom > frameDivBottom) {
+                if((fallingBlock.x <= frameDivX || fallingBlock.right >= frameDivRight) || fallingBlock.bottom >= frameDivBottom) {
                     rotation = initialRotation;
                     backroundChoice.style.transform = initialTransform;
                     backroundChoice.style.marginLeft = initialMarginLeft;
@@ -234,7 +238,7 @@ function collusionCheck() {
 
     for (let i = 0 ; i < allBlocks.length ; i ++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
-            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top == fallingBlocks[j].getBoundingClientRect().bottom) {
+            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top <= fallingBlocks[j].getBoundingClientRect().bottom) {
                 return true;
             }
         }      
