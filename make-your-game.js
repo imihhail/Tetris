@@ -3,6 +3,7 @@ window.onresize = function() {
 };
 
 let frame = document.createElement('div');
+frame.className = 'frame'
 frame.style.width = "380px";
 frame.style.height = "760px";
 frame.style.border = '38px ridge rgb(9, 23, 174)';
@@ -16,7 +17,9 @@ let gameOver = false
 let statsFrame = document.createElement('div')
 statsFrame.className = 'test'
 let scoreTag = document.createElement('p')
-scoreTag.innerHTML = `${score}<br><br>`
+scoreTag.style.zIndex = '1'
+scoreTag.style.marginTop = '0px'
+scoreTag.innerHTML = `SCORE<br><br>${score}<br><br>`
 let lifeTag = document.createElement('p')
 lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`;
 let timerTag = document.createElement('p')
@@ -25,10 +28,8 @@ statsFrame.style.width = "180px";
 statsFrame.style.height = "300px";
 statsFrame.style.border = '14.4px ridge rgb(9, 23, 174)';
 statsFrame.style.padding = '14.4px'
-statsFrame.innerHTML = 'SCORE'
 statsFrame.style.color = "white"
 statsFrame.style.fontSize = '20px'
-statsFrame.style.textAlign = 'center'
 
 
 let centerDiv = document.createElement('div');
@@ -36,6 +37,7 @@ centerDiv.style.display = "flex";
 centerDiv.style.justifyContent = "center";
 
 let parentDiv = document.createElement('div');
+parentDiv.className = 'parent'
 parentDiv.style.display = "flex";
 parentDiv.style.justifyContent = "center";
 parentDiv.style.alignItems = "center";
@@ -45,14 +47,14 @@ verticalDiv.style.display = "block";
 
 centerDiv.appendChild(frame);
 
-verticalDiv.appendChild(statsFrame);
 statsFrame.appendChild(scoreTag)
 statsFrame.appendChild(lifeTag)
 statsFrame.appendChild(timerTag)
 parentDiv.appendChild(centerDiv);
-parentDiv.appendChild(verticalDiv);
+parentDiv.appendChild(statsFrame);
 document.body.appendChild(parentDiv);
 document.body.style.overflow = "hidden"
+
 
 let frameDivBottom = frame.getBoundingClientRect().bottom - 38
 let frameDivX = frame.getBoundingClientRect().x + 38
@@ -61,6 +63,19 @@ let blockCounter = 1
 let speed = 2
 let animationId = null
 let gamePaused = false
+
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && (event.key === '+' || event.key === '-' || event.key === '=')) {
+        event.preventDefault();
+    }
+}, false);
+
+document.addEventListener('wheel', function(event) {
+    if (event.ctrlKey) {
+        event.preventDefault();
+    }
+}, { passive: false });
+
 
 function line() {
     let backroundChoice = ''
@@ -128,7 +143,7 @@ function line() {
 
     let rotation = 0;
     document.addEventListener('keydown', (e) => {
-        if (e.key === ' ' && backroundChoice.id == blockCounter && randomNumber != 2) {
+        if (e.key === 'ArrowUp' && backroundChoice.id == blockCounter && randomNumber != 2) {
             const initialRotation = rotation;
             const initialTransform = backroundChoice.style.transform;
             const initialMarginLeft = backroundChoice.style.marginLeft;
@@ -229,27 +244,24 @@ function line() {
     }
     animationId = window.requestAnimationFrame(drop)
 }
-line()
+
 
 
 function collusionCheck() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
-
     for (let i = 0 ; i < allBlocks.length ; i ++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
-            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top <= fallingBlocks[j].getBoundingClientRect().bottom) {
+            if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top == fallingBlocks[j].getBoundingClientRect().bottom) {
                 return true;
             }
         }      
     }
     return false;
 }
-
 function collusionCheck1() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
-
     for (let i = 0 ; i < allBlocks.length ; i ++) {
         for (let j = 0; j < fallingBlocks.length; j++) {
             if (allBlocks[i].getBoundingClientRect().left == fallingBlocks[j].getBoundingClientRect().left && allBlocks[i].getBoundingClientRect().top -38 <= fallingBlocks[j].getBoundingClientRect().bottom) {
@@ -259,7 +271,6 @@ function collusionCheck1() {
     }
     return false;
 }
-
 function collusionCheck2() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
@@ -273,7 +284,6 @@ function collusionCheck2() {
     }
     return false;
 }
-
 function collusionCheck3() {
     let allBlocks = document.querySelectorAll(`.oneBlock:not([id="${blockCounter}"])`);
     let fallingBlocks = document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`);
@@ -390,7 +400,17 @@ function deleteRows() {
                     score += 10
                     countdown += 4
 
-                    scoreTag.innerHTML = `${score}<br><br>`
+                    scoreTag.innerHTML = `SCORE<br><br>${score}<br><br>`
+                    scoreTag.style.color = "rgb(64, 255, 0)";
+                    scoreTag.style.transform = "scale(1.1)"
+                    timerTag.style.color = "rgb(64, 255, 0)";
+                    timerTag.style.transform = "scale(1.1)"
+                    setTimeout(function() {
+                        scoreTag.style.color = ""
+                        scoreTag.style.transform = ''
+                        timerTag.style.color = ""
+                        timerTag.style.transform = ''
+                    }, 300);
                     adjustBlocks(allBlocks, removedRowFloor)
                     removeCount = 0;                 
                 }
@@ -428,7 +448,6 @@ function startCountdown() {
     function updateDisplay() {
         let minutes = Math.floor(countdown / 60);
         let seconds = countdown % 60;
-
         timerTag.innerHTML = `TIME LEFT <br><br> ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     }
     updateDisplay();
@@ -451,7 +470,7 @@ function startCountdown() {
         }
     }, 1000);
 }
-startCountdown();
+
 
 function GameOverWindow(){
         let loseWindow = document.createElement('div')
@@ -469,7 +488,7 @@ function GameOverWindow(){
             life = 1
             score = 0
             lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`
-            scoreTag.innerHTML = `${score}<br><br>`
+            scoreTag.innerHTML = `SCORE<br><br>${score}<br><br>`
             countdown = 60
             startCountdown()
             line()
@@ -479,6 +498,27 @@ function GameOverWindow(){
         document.body.appendChild(loseWindow)
 }
 
+function welcomeMenu(){
+    let welcomeFlag = false
+    let welcomeWindow = document.createElement('div')
+    welcomeWindow.className = 'welcomeClass'
+    welcomeWindow.innerHTML = 'Welcome to TETRIS<br><br><br>Press ENTER to play<br><br>Press P to pause<br><br>Use arrowkeys to navigate'
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !welcomeFlag) {
+            statsFrame.style.transform = 'translateX(150%)'
+            startCountdown()
+            line()
+            welcomeFlag = true
+           welcomeWindow.remove()
+        }
+    })
+
+    document.body.appendChild(welcomeWindow)
+}
+window.onload = function () {
+    welcomeMenu();
+};
 
 
 
