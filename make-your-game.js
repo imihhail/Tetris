@@ -31,7 +31,6 @@ statsFrame.style.padding = '14.4px'
 statsFrame.style.color = "white"
 statsFrame.style.fontSize = '20px'
 
-
 let centerDiv = document.createElement('div');
 centerDiv.style.display = "flex";
 centerDiv.style.justifyContent = "center";
@@ -198,12 +197,23 @@ function line() {
                 restartText.innerHTML = 'RESTART';
                 restartText.className = 'restartClass';
 
-                restartText.addEventListener('click', ()=>{
-                    location.reload();
+                restartText.addEventListener('click', ()=>{                  
+                    yPos = 0
+                    blockCounter = 1
+                    frame.innerHTML = ''
+                    gamePaused = false
+                    pauseDiv.style.display = 'none'
+                    life = 1
+                    score = 0
+                    lifeTag.innerHTML = `LIFE LEFT<br><br>${life}<br><br>`
+                    scoreTag.innerHTML = `SCORE<br><br>${score}<br><br>`
+                    countdown = 61
+                    line()
                 });
 
                 continueText.addEventListener('click', ()=>{
                     animationId = window.requestAnimationFrame(drop);
+
                     gamePaused = false
                     pauseDiv.remove()
                 });
@@ -399,7 +409,6 @@ function deleteRows() {
                 if (removeCount === 10) {
                     score += 10
                     countdown += 4
-
                     scoreTag.innerHTML = `SCORE<br><br>${score}<br><br>`
                     scoreTag.style.color = "rgb(64, 255, 0)";
                     scoreTag.style.transform = "scale(1.1)"
@@ -482,6 +491,8 @@ function GameOverWindow(){
         restardText.innerHTML = 'RESTART'
 
         restardText.addEventListener('click', ()=>{
+            yPos = 0
+            blockCounter = 1
             frame.innerHTML = ''
             gameOver = false
             loseWindow.style.display = 'none'
@@ -502,7 +513,7 @@ function welcomeMenu(){
     let welcomeFlag = false
     let welcomeWindow = document.createElement('div')
     welcomeWindow.className = 'welcomeClass'
-    welcomeWindow.innerHTML = 'Welcome to TETRIS<br><br><br>Press ENTER to play<br><br>Press P to pause<br><br>Use arrowkeys to navigate'
+    welcomeWindow.innerHTML = 'Welcome to TETRIS!<br><br><br>Press ENTER to play<br><br>Press P to pause<br><br>Use arrowkeys to navigate'
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !welcomeFlag) {
