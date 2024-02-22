@@ -199,7 +199,7 @@ function line() {
 
                 restartText.addEventListener('click', ()=>{                  
                     yPos = 0
-                    blockCounter = 1
+                    //blockCounter = 1
                     frame.innerHTML = ''
                     gamePaused = false
                     pauseDiv.style.display = 'none'
@@ -492,7 +492,7 @@ function GameOverWindow(){
 
         restardText.addEventListener('click', ()=>{
             yPos = 0
-            blockCounter = 1
+            //blockCounter = 0
             frame.innerHTML = ''
             gameOver = false
             loseWindow.style.display = 'none'

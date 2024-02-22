@@ -86,7 +86,7 @@ body {
   width: 500px;
   opacity: 0.9;
   font-size: 20px;
-display: grid;
+  display: grid;
   place-items: center;
   z-index: 3;
 }
