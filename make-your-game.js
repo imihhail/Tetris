@@ -170,7 +170,7 @@ function line() {
             }
             for (let i = 0 ; i < fallingBlocks.length ; i++){
                 let fallingBlock = fallingBlocks[i].getBoundingClientRect();
-                if((fallingBlock.x <= frameDivX || fallingBlock.right >= frameDivRight) || fallingBlock.bottom >= frameDivBottom) {
+                if((fallingBlock.x <= frameDivX - 38 || fallingBlock.right >= frameDivRight + 38) || fallingBlock.bottom >= frameDivBottom) {
                     rotation = initialRotation;
                     backroundChoice.style.transform = initialTransform;
                     backroundChoice.style.marginLeft = initialMarginLeft;
@@ -199,7 +199,6 @@ function line() {
 
                 restartText.addEventListener('click', ()=>{                  
                     yPos = 0
-                    //blockCounter = 1
                     frame.innerHTML = ''
                     gamePaused = false
                     pauseDiv.style.display = 'none'
@@ -254,7 +253,6 @@ function line() {
     }
     animationId = window.requestAnimationFrame(drop)
 }
-
 
 
 function collusionCheck() {
