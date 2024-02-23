@@ -131,7 +131,6 @@ function line() {
         let fallingBlocks = Array.from(document.querySelectorAll(`.oneBlock[id="${blockCounter}"]`))
         var frameCollusion = fallingBlocks.some((block) => block.getBoundingClientRect().bottom >= frameDivBottom - 38)
 
-        
         if (e.key === 'ArrowDown' && backroundChoice.id == blockCounter && !frameCollusion && !collusionCheck1()) {
             while (yPos % 38 !== 0) {
                 yPos++
@@ -197,7 +196,8 @@ function line() {
                 restartText.innerHTML = 'RESTART';
                 restartText.className = 'restartClass';
 
-                restartText.addEventListener('click', ()=>{                  
+                restartText.addEventListener('click', ()=>{       
+                    blockCounter = blockCounter +1
                     yPos = 0
                     frame.innerHTML = ''
                     gamePaused = false
@@ -212,7 +212,6 @@ function line() {
 
                 continueText.addEventListener('click', ()=>{
                     animationId = window.requestAnimationFrame(drop);
-
                     gamePaused = false
                     pauseDiv.remove()
                 });
@@ -235,7 +234,7 @@ function line() {
             return
         }
     
-        if (!frameCollusion && !collusionCheck() ) {
+        if (!frameCollusion && !collusionCheck() ) {          
             yPos += speed       
             backroundChoice.style.marginTop = `${yPos}px`
             animationId = requestAnimationFrame(drop)
@@ -490,7 +489,7 @@ function GameOverWindow(){
 
         restardText.addEventListener('click', ()=>{
             yPos = 0
-            //blockCounter = 0
+            blockCounter = blockCounter + 1
             frame.innerHTML = ''
             gameOver = false
             loseWindow.style.display = 'none'
@@ -519,7 +518,7 @@ function welcomeMenu(){
             startCountdown()
             line()
             welcomeFlag = true
-           welcomeWindow.remove()
+            welcomeWindow.remove()
         }
     })
 
